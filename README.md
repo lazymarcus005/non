@@ -89,6 +89,47 @@ private async Task<string> GetLongLivedToken(string shortLivedToken)
 
 To subscribe to the Instagram webhook, use the Graph API. Register your webhook endpoint in your Instagram app dashboard.
 
+You can also subscribe programmatically using C#:
+
+```csharp
+using System.Net.Http.Json;
+
+// Example C# method for programmatic subscription
+public async Task<bool> SubscribeToInstagramWebhook()
+{
+    var subscriptionEndpoint = $"https://graph.facebook.com/v12.0/{YourAppId}/subscriptions";
+    var payload = new
+    {
+        object = "instagram",
+        callback_url = "YOUR_WEBHOOK_CALLBACK_URL",
+        fields = "messages",
+        verify_token = "YOUR_VERIFY_TOKEN",
+        access_token = "YOUR_APP_ACCESS_TOKEN"
+    };
+    var response = await _httpClient.PostAsJsonAsync(subscriptionEndpoint, payload);
+    return response.IsSuccessStatusCode;
+}
+```
+
+### Permissions for Required Features
+
+To fully implement the Instagram Messenger chat system, the following permissions are required:
+
+1. **For Instagram Login and Access Token Management**
+   - `instagram_basic`: Access to the user’s basic profile information.
+   - `instagram_graph_user_profile`: Access to the user’s Instagram profile details.
+   - `instagram_graph_user_media`: Access to user media such as photos and videos.
+
+2. **For Webhook Subscriptions**
+   - `pages_manage_metadata`: Manage and read metadata from connected pages.
+   - `pages_read_engagement`: Read engagement data for message events.
+
+3. **For Message Handling and Sending**
+   - `pages_messaging`: Send and receive messages on pages.
+   - `pages_messaging_subscriptions`: Subscribe to message events.
+
+These permissions can be requested and configured in the Meta Developer Portal.
+
 ## Step 4: C# Web API to Handle Incoming Messages from Webhook
 
 When Instagram sends messages to your webhook, capture and store the sender’s info.
@@ -160,7 +201,4 @@ public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest reque
 
 1. **Webhook Verification:** Instagram will send a verification challenge upon setup; ensure your endpoint responds to verification requests.
 2. **Long-Lived Token Expiration:** The long-lived access token has an expiration; schedule token refresh requests.
-3. **Permissions:** Ensure your Instagram app has the `pages_messaging` and `pages_messaging_subscriptions` permissions.
-4. **Security:** Store tokens and sensitive data securely.
-
-This guide provides a basic, secure structure for building an Instagram messaging system with user authentication, token management, webhook handling, and message sending capabilities.
+3. **Security:** Store tokens and sensitive data securely.
